@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.laserscorpion.redadalertas.apachefix.RequestPrinter;
 import com.msopentech.thali.android.toronionproxy.AndroidOnionProxyManager;
 import com.msopentech.thali.toronionproxy.Utilities;
 
@@ -25,7 +26,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 public class TorURLLoader {
-    String fileStorageLocation = "torfiles";
+    private String fileStorageLocation = "torfiles";
+    private Context context;
     private static final String TAG = "TorURLLoader";
     private AndroidOnionProxyManager manager;
     private boolean started = false;
@@ -33,6 +35,7 @@ public class TorURLLoader {
 
 
     TorURLLoader(Context context) {
+        this.context = context;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         TorStartThread thread = new TorStartThread(this);
         thread.start();
@@ -41,7 +44,7 @@ public class TorURLLoader {
     public void loadURL(URL url, URLDataReceiver receiver) throws SocketException {
         HttpRequest request = createRequest(url);
         Log.d(TAG, "***************");
-        Log.d(TAG, request.toString());
+        Log.d(TAG, new RequestPrinter(context).print(request));
         Log.d(TAG, "***************");
 
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX); // FIXME
