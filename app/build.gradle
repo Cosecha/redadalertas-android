@@ -17,6 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+    }
 }
 
 repositories {
@@ -33,5 +38,8 @@ dependencies {
     compile 'com.msopentech.thali:ThaliOnionProxyAndroid:0.0.2'
     compile 'org.slf4j:slf4j-android:1.7.7'
     testCompile 'junit:junit:4.12'
-    compile files('libs/ThaliOnionProxyAndroid-0.0.2-sources.jar')
+    compile files('libs/httpclient-4.5.3.jar')
+    compile files('libs/httpcore-4.4.6.jar')
 }
+
+
