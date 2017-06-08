@@ -1,6 +1,8 @@
 package com.laserscorpion.redadalertas;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -26,6 +28,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 public class TorURLLoader {
+    private static final String APP_NAME = "com.laserscorpion.redadalertas";
+    private static final String CRLF = "\r\n";
+    private String version = "*";
     private String fileStorageLocation = "torfiles";
     private Context context;
     private static final String TAG = "TorURLLoader";
@@ -33,12 +38,12 @@ public class TorURLLoader {
     private boolean started = false;
 
 
-
     TorURLLoader(Context context) {
         this.context = context;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         TorStartThread thread = new TorStartThread(this);
         thread.start();
+        getVersion();
     }
 
     public void loadURL(URL url, URLDataReceiver receiver) throws SocketException {
@@ -47,26 +52,40 @@ public class TorURLLoader {
         Log.d(TAG, new RequestPrinter(context).print(request));
         Log.d(TAG, "***************");*/
         String request = createRequest(url);
-
+        
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX); // FIXME
         waitForTor();
         SSLSocket socket = connectToServerViaTor(url);
 
         sendRequest(socket, request);
-        String result = readStream(socket);
-        Log.d(TAG, result);
-        receiver.requestComplete(true, result);
+        try {
+            String result = readStream(socket);
+            receiver.requestComplete(true, result);
+        } catch (IOException e) {
+            receiver.requestComplete(false, "");
+        }
+
     }
 
     /**
      * temporary, just to test...actually wait, maybe this is all we actually need ugh
      */
     private String createRequest(URL url) {
-        String request = "GET /" + url.getFile() + " HTTP/1.1\r\n";
-        request += "Host: " + url.getHost() + "\r\n";
-        request += "User-Agent: RedadAlertas Android 0.0.1\r\n";
-        request += "\r\n";
+        String request = "GET /" + url.getFile() + " HTTP/1.1"  + CRLF;
+        request += "Host: " + url.getHost() + CRLF;
+        request += "User-Agent: " + context.getString(R.string.user_agent) + " " + version + CRLF;
+        request += CRLF;
         return request;
+    }
+
+    private void getVersion() {
+        try {
+            PackageInfo info = context.getPackageManager().getPackageInfo(APP_NAME, 0);
+            version = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("RequestPrinter","Did we change the package name?");
+            e.printStackTrace();
+        }
     }
 
     /*private HttpRequest createRequest(URL url) {
@@ -92,7 +111,7 @@ public class TorURLLoader {
         }
     }
 
-    private String readStream(Socket socket) {
+    private String readStream(Socket socket) throws IOException {
         InputStreamReader stream = null;
         try {
             stream = new InputStreamReader(socket.getInputStream(), "utf-8");
@@ -104,13 +123,8 @@ public class TorURLLoader {
         String result = "";
         String line = null;
         do {
-            try {
-                line = reader.readLine();
-                result += line;
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading stream");
-                e.printStackTrace();
-            }
+            line = reader.readLine();
+            result += line;
         } while(line != null);
 
         return result;
@@ -180,14 +194,7 @@ public class TorURLLoader {
             synchronized (parent) {
                 parent.notify();
             }
-
         }
     }
 
-    private class HttpThread extends Thread {
-
-        public HttpThread() {
-
-        }
-    }
 }

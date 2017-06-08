@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RedadAlertas</string>
+    <string name="user_agent">RedadAlertas Android</string>
 </resources>
