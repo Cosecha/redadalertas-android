@@ -42,10 +42,11 @@ public class TorURLLoader {
     }
 
     public void loadURL(URL url, URLDataReceiver receiver) throws SocketException {
-        HttpRequest request = createRequest(url);
+        /*HttpRequest request = createRequest(url);
         Log.d(TAG, "***************");
         Log.d(TAG, new RequestPrinter(context).print(request));
-        Log.d(TAG, "***************");
+        Log.d(TAG, "***************");*/
+        String request = createRequest(url);
 
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX); // FIXME
         waitForTor();
@@ -57,20 +58,31 @@ public class TorURLLoader {
         receiver.requestComplete(true, result);
     }
 
-    private HttpRequest createRequest(URL url) {
+    /**
+     * temporary, just to test...actually wait, maybe this is all we actually need ugh
+     */
+    private String createRequest(URL url) {
+        String request = "GET /" + url.getFile() + " HTTP/1.1\r\n";
+        request += "Host: " + url.getHost() + "\r\n";
+        request += "User-Agent: RedadAlertas Android 0.0.1\r\n";
+        request += "\r\n";
+        return request;
+    }
+
+    /*private HttpRequest createRequest(URL url) {
         HttpRequestFactory factory = new DefaultHttpRequestFactory();
         try {
             return factory.newHttpRequest("GET", url.toString());
         } catch (MethodNotSupportedException e) {
             return null; // never called
         }
-    }
+    }*/
 
-    private void sendRequest(SSLSocket socket, HttpRequest request) {
+    private void sendRequest(SSLSocket socket, String request) {
         try {
             OutputStreamWriter writer;
             writer = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-            writer.write(request.toString());
+            writer.write(request);
             writer.flush();
         } catch (IOException e) {
             // todo why would this happen?
