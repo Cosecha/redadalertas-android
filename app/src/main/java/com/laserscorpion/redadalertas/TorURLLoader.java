@@ -27,7 +27,7 @@ import java.net.URL;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-public class TorURLLoader {
+public class TorURLLoader extends Thread {
     private static final String APP_NAME = "com.laserscorpion.redadalertas";
     private static final String CRLF = "\r\n";
     private String version = "*";
@@ -35,34 +35,63 @@ public class TorURLLoader {
     private Context context;
     private static final String TAG = "TorURLLoader";
     private AndroidOnionProxyManager manager;
+    private URL url;
+    private URLDataReceiver receiver;
     private boolean started = false;
 
-
-    TorURLLoader(Context context) {
+    /**
+     * Starts Tor, loads a URL, and stops Tor. A single-use deal.
+     *
+     * This avoids having to worry about
+     * whether we should keep Tor running in the background, or running multiple instances by accident.
+     * But it is SLOW. We have to download directory information and build fresh circuits every time.
+     *
+     * ALSO it is not super robust. For example, when using TorCheckActivity, pause and resume the app
+     * while still loading the URL the first time. The second Tor instance fails to start and everything
+     * gets messed up from then on.
+     *
+     * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
+     * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
+     * using it wrong.
+     * @param context
+     * @param url
+     * @param receiver since all this networking is slow, you'll need to wait for your response, so listen here
+     */
+    TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
         this.context = context;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         TorStartThread thread = new TorStartThread(this);
         thread.start();
         getVersion();
+        this.url = url;
+        this.receiver = receiver;
     }
 
-    public void loadURL(URL url, URLDataReceiver receiver) throws SocketException {
-        /*HttpRequest request = createRequest(url);
-        Log.d(TAG, "***************");
-        Log.d(TAG, new RequestPrinter(context).print(request));
-        Log.d(TAG, "***************");*/
-        String request = createRequest(url);
-        
-        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX); // FIXME
-        waitForTor();
-        SSLSocket socket = connectToServerViaTor(url);
+    public void loadURL() throws SocketException {
 
-        sendRequest(socket, request);
+    }
+
+    public void run() {
         try {
-            String result = readStream(socket);
-            receiver.requestComplete(true, result);
-        } catch (IOException e) {
-            receiver.requestComplete(false, "");
+            String request = createRequest(url);
+            try {
+                waitForTor();
+            } catch (SocketException e) {
+                throw new Exception(context.getString(R.string.tor_start_error), e);
+            }
+
+            try {
+                SSLSocket socket = connectToServerViaTor(url);
+                sendRequest(socket, request);
+                String result = readStream(socket);
+                receiver.requestComplete(true, result);
+            } catch (SocketException e) { // connectToServerWithTor()
+                throw new Exception(context.getString(R.string.server_connection_error), e);
+            } catch (IOException e) { // readStream()
+                throw new Exception(context.getString(R.string.network_download_error), e);
+            }
+        } catch (Exception e) {
+            receiver.requestComplete(false, e.getMessage());
         }
 
     }

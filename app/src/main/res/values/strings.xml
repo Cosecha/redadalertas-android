@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">RedadAlertas</string>
     <string name="user_agent">RedadAlertas Android</string>
+    <!-- unclear if the following strings will ever be user visible, but better safe than sorry here -->
+    <string name="network_download_error">Problem downloading latest alerts from network.</string>
+    <string name="tor_start_error">Can\'t connect to the network. Try again later?</string>
+    <string name="server_connection_error">Can\'t connect to RedadAlertas server. Try again later?</string>
+    <!-- =========================================================================================== -->
 </resources>

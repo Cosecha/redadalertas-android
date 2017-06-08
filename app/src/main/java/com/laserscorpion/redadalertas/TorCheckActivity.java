@@ -19,23 +19,29 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
     @Override
     protected void onResume() {
         super.onResume();
-        TorURLLoader loader = new TorURLLoader(this);
+
         try {
-            loader.loadURL(new URL("https://check.torproject.org"), this);
-        } catch (SocketException e) {
-            e.printStackTrace();
+            TorURLLoader loader = new TorURLLoader(this, new URL("https://check.torproject.org"), this);
+            loader.start();
         } catch (MalformedURLException e) {
             // let's just not malform the URL, ok?
         }
+
     }
 
     @Override
-    public void requestComplete(boolean successful, String data) {
-        WebView web = (WebView)findViewById(R.id.tor_web_view);
-        if (successful) {
-            web.loadData(data, "text/html", "utf-8");
-        } else
-            web.loadData("uhhhh failure", "text/plain", "utf-8");
+    public void requestComplete(final boolean successful, final String data) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WebView web = (WebView)findViewById(R.id.tor_web_view);
+                if (successful) {
+                    web.loadData(data, "text/html", "utf-8");
+                } else
+                    web.loadData("uhhhh failure: " + data, "text/plain", "utf-8");
+
+            }
+        });
 
     }
 }
