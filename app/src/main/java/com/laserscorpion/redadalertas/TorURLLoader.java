@@ -40,35 +40,34 @@ public class TorURLLoader extends Thread {
     private boolean started = false;
 
     /**
-     * Starts Tor, loads a URL, and stops Tor. A single-use deal.
+     * Starts Tor, loads a URL, and stops Tor. A single-use deal. Provide the URL in the constructor
+     * then call start().
      *
-     * This avoids having to worry about
-     * whether we should keep Tor running in the background, or running multiple instances by accident.
-     * But it is SLOW. We have to download directory information and build fresh circuits every time.
+     * This avoids having to worry about whether we should keep Tor running in the background, or
+     * running multiple instances by accident.
+     * But it is SLOW. We (maybe) have to download directory information and (definitely) build
+     * fresh circuits every time.
      *
-     * ALSO it is not super robust. For example, when using TorCheckActivity, pause and resume the app
-     * while still loading the URL the first time. The second Tor instance fails to start and everything
-     * gets messed up from then on.
+     * ALSO it is not super robust. For example, when using TorCheckActivity, try to pause and resume
+     * the app while still loading the URL the first time. The second Tor instance fails to start and
+     * everything gets messed up from then on.
      *
      * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
      * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
      * using it wrong.
      * @param context
      * @param url
-     * @param receiver since all this networking is slow, you'll need to wait for your response, so listen here
+     * @param receiver since all this networking is slow, you'll need to wait for your response, so
+     *                 implement this to listen for it
      */
     TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
-        this.context = context;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         TorStartThread thread = new TorStartThread(this);
         thread.start();
         getVersion();
+        this.context = context;
         this.url = url;
         this.receiver = receiver;
-    }
-
-    public void loadURL() throws SocketException {
-
     }
 
     public void run() {
@@ -83,17 +82,22 @@ public class TorURLLoader extends Thread {
             try {
                 SSLSocket socket = connectToServerViaTor(url);
                 sendRequest(socket, request);
-                String result = readStream(socket);
+                final String result = readStream(socket);
                 receiver.requestComplete(true, result);
             } catch (SocketException e) { // connectToServerWithTor()
                 throw new Exception(context.getString(R.string.server_connection_error), e);
             } catch (IOException e) { // readStream()
                 throw new Exception(context.getString(R.string.network_download_error), e);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             receiver.requestComplete(false, e.getMessage());
         }
-
+        try {
+            manager.stop();
+        } catch (IOException e) {
+            // this is bad. if we can't stop it, we can't start again later
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -209,7 +213,10 @@ public class TorURLLoader extends Thread {
 
             while (true) {
                 try {
-                    started = manager.startWithRepeat(totalSecondsPerTorStartup, totalTriesPerTorStartup);
+                    if (manager.isRunning())
+                        started = true;
+                    else
+                        started = manager.startWithRepeat(totalSecondsPerTorStartup, totalTriesPerTorStartup);
                     break;
                 } catch (InterruptedException e) {
                     continue;
