@@ -24,9 +24,29 @@ import java.net.URL;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+/**
+ * Starts Tor, loads a URL, and stops Tor. A single-use deal. Provide the URL in the constructor
+ * then call start().
+ *
+ * This avoids having to worry about whether we should keep Tor running in the background, or
+ * running multiple instances by accident.
+ * But it is SLOW. We (maybe) have to download directory information and (definitely) build
+ * fresh circuits every time.
+ *
+ * ALSO it is not super robust. For example, when using TorCheckActivity, try to pause and resume
+ * the app while still loading the URL the first time (or change the orientation).
+ * The second Tor instance fails to start and everything gets messed up from then on.
+ *
+ * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
+ * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
+ * using it wrong.
+ *
+ * Note: assumes response will be in utf-8. If it's not, please retire your 90s web server.
+ */
 public class TorURLLoader extends Thread {
     private static final String APP_NAME = "com.laserscorpion.redadalertas";
     private static final String CRLF = "\r\n";
+    private static final String CHARSET = "utf-8"; // the only one you may ever use for anything ever again, says me
     private String version = "*";
     private String fileStorageLocation = "torfiles";
     private Context context;
@@ -36,27 +56,10 @@ public class TorURLLoader extends Thread {
     private URLDataReceiver receiver;
     private boolean started = false;
 
-    /**
-     * Starts Tor, loads a URL, and stops Tor. A single-use deal. Provide the URL in the constructor
-     * then call start().
-     *
-     * This avoids having to worry about whether we should keep Tor running in the background, or
-     * running multiple instances by accident.
-     * But it is SLOW. We (maybe) have to download directory information and (definitely) build
-     * fresh circuits every time.
-     *
-     * ALSO it is not super robust. For example, when using TorCheckActivity, try to pause and resume
-     * the app while still loading the URL the first time. The second Tor instance fails to start and
-     * everything gets messed up from then on.
-     *
-     * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
-     * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
-     * using it wrong.
-     *
-     * Note: assumes response will be utf-8. If it's not, please retire your 90s web server.
-     *
+     /**
+      * After constructing this new URL loader, don't forget to call start()
      * @param context
-     * @param url
+     * @param url the one you want to load, you know?
      * @param receiver since all this networking is slow, you'll need to wait for your response, so
      *                 implement this to listen for it
      */
@@ -118,7 +121,11 @@ public class TorURLLoader extends Thread {
                 receiver.requestComplete(false, null);
             }
         } else if (statusCode >= 300 && statusCode < 400) {
-
+            // !!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!
+            // todo we probably do want to handle redirects!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!
         } else {
             Log.e(TAG, "HTTP request failed! Status: " + statusCode);
             receiver.requestComplete(false, null);
@@ -160,7 +167,7 @@ public class TorURLLoader extends Thread {
     private void sendRequest(SSLSocket socket, String request) {
         try {
             OutputStreamWriter writer;
-            writer = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+            writer = new OutputStreamWriter(socket.getOutputStream(), CHARSET);
             writer.write(request);
             writer.flush();
         } catch (IOException e) {
@@ -174,7 +181,7 @@ public class TorURLLoader extends Thread {
     private String readStream(Socket socket) throws IOException {
         InputStreamReader stream = null;
         try {
-            stream = new InputStreamReader(socket.getInputStream(), "utf-8");
+            stream = new InputStreamReader(socket.getInputStream(), CHARSET);
         } catch (IOException e) {
             // todo is this actually possible since we just set up this socket?
             e.printStackTrace();
