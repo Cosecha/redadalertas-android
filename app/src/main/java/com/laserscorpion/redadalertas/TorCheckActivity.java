@@ -17,8 +17,8 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         try {
             TorURLLoader loader = new TorURLLoader(this, new URL("https://check.torproject.org"), this);

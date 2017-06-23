@@ -3,17 +3,14 @@ package com.laserscorpion.redadalertas;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.StrictMode;
 import android.util.Log;
 
-import com.laserscorpion.redadalertas.apachefix.RequestPrinter;
+import com.laserscorpion.redadalertas.apachefix.ApacheResponseFactory;
 import com.msopentech.thali.android.toronionproxy.AndroidOnionProxyManager;
 import com.msopentech.thali.toronionproxy.Utilities;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestFactory;
-import org.apache.http.MethodNotSupportedException;
-import org.apache.http.impl.DefaultHttpRequestFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,19 +52,22 @@ public class TorURLLoader extends Thread {
      * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
      * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
      * using it wrong.
+     *
+     * Note: assumes response will be utf-8. If it's not, please retire your 90s web server.
+     *
      * @param context
      * @param url
      * @param receiver since all this networking is slow, you'll need to wait for your response, so
      *                 implement this to listen for it
      */
     TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
+        this.context = context;
+        this.url = url;
+        this.receiver = receiver;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         TorStartThread thread = new TorStartThread(this);
         thread.start();
         getVersion();
-        this.context = context;
-        this.url = url;
-        this.receiver = receiver;
     }
 
     public void run() {
@@ -82,8 +82,9 @@ public class TorURLLoader extends Thread {
             try {
                 SSLSocket socket = connectToServerViaTor(url);
                 sendRequest(socket, request);
-                final String result = readStream(socket);
-                receiver.requestComplete(true, result);
+                String result = readStream(socket);
+                HttpResponse response = ApacheResponseFactory.parse(result);
+                handleResponse(response);
             } catch (SocketException e) { // connectToServerWithTor()
                 throw new Exception(context.getString(R.string.server_connection_error), e);
             } catch (IOException e) { // readStream()
@@ -92,16 +93,42 @@ public class TorURLLoader extends Thread {
         } catch (final Exception e) {
             receiver.requestComplete(false, e.getMessage());
         }
+
         try {
             manager.stop();
         } catch (IOException e) {
-            // this is bad. if we can't stop it, we can't start again later
+            // this is bad. if we can't stop it now, we can't re-start again later
+            Log.e(TAG, "Uh oh, can't stop Tor.");
             e.printStackTrace();
         }
     }
 
+    private void handleResponse(HttpResponse response) {
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode < 200) {
+            Log.d(TAG, "Received an HTTP status code we don't care about: " + statusCode);
+            return;
+        } else if (statusCode >= 200 && statusCode < 300) {
+            try {
+                String responseBody = EntityUtils.toString(response.getEntity());
+                receiver.requestComplete(true, responseBody);
+            } catch (IOException e) {
+                Log.e(TAG, "IOExceptions are extremely nonspecific. The request completed but some unknown thing failed. Have fun!");
+                e.printStackTrace();
+                receiver.requestComplete(false, null);
+            }
+        } else if (statusCode >= 300 && statusCode < 400) {
+
+        } else {
+            Log.e(TAG, "HTTP request failed! Status: " + statusCode);
+            receiver.requestComplete(false, null);
+        }
+
+    }
+
     /**
      * temporary, just to test...actually wait, maybe this is all we actually need ugh
+     * can we really get away with only writing this much HTTP?
      */
     private String createRequest(URL url) {
         String request = "GET /" + url.getFile() + " HTTP/1.1"  + CRLF;
@@ -116,7 +143,7 @@ public class TorURLLoader extends Thread {
             PackageInfo info = context.getPackageManager().getPackageInfo(APP_NAME, 0);
             version = info.versionName;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("RequestPrinter","Did we change the package name?");
+            Log.e(TAG,"Did we change the package name?");
             e.printStackTrace();
         }
     }
@@ -154,11 +181,13 @@ public class TorURLLoader extends Thread {
         }
         BufferedReader reader = new BufferedReader(stream);
         String result = "";
-        String line = null;
-        do {
-            line = reader.readLine();
-            result += line;
-        } while(line != null);
+        char buf[] = new char[100];
+        int read = reader.read(buf, 0, buf.length);
+        while (read >= 0) {
+            String justRead = new String(buf, 0, read);
+            result += justRead;
+            read = reader.read(buf, 0, buf.length);
+        }
 
         return result;
     }
@@ -198,7 +227,10 @@ public class TorURLLoader extends Thread {
     }
 
 
-
+    /**
+     * We could also think about using a thread pool. Java has some such kind of thing. And then there's
+     * always AsyncTask, but I don't really like its interface.
+     */
     private class TorStartThread extends Thread {
         private static final int totalSecondsPerTorStartup = 4 * 60;
         private static final int totalTriesPerTorStartup = 5;
