@@ -5,5 +5,6 @@
     <string name="network_download_error">Problem downloading latest alerts from network.</string>
     <string name="tor_start_error">Can\'t connect to the network. Try again later?</string>
     <string name="server_connection_error">Can\'t connect to RedadAlertas server. Try again later?</string>
+    <string name="timeout_error">No response from RedadAlertas server. Try again later? (Is your internet connection working?)</string>
     <!-- =========================================================================================== -->
 </resources>

@@ -21,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import javax.net.ssl.SSLSocket;
@@ -96,6 +97,8 @@ public class TorURLLoader extends Thread {
                 HttpResponse response = ApacheResponseFactory.parse(result);
                 handleResponse(response);
             } catch (SocketException e) { // connectToServerWithTor()
+            } catch (SocketTimeoutException e) {
+                throw new Exception(context.getString(R.string.timeout_error), e);
                 throw new Exception(context.getString(R.string.server_connection_error), e);
             } catch (IOException e) { // readStream()
                 throw new Exception(context.getString(R.string.network_download_error), e);
