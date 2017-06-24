@@ -26,22 +26,25 @@ import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Starts Tor, loads a URL, and stops Tor. A single-use deal. Provide the URL in the constructor
- * then call start().
+ * then call start(). Call cancel() if the calling URLDataReceiver need to die before the request is
+ * complete.
  *
- * This avoids having to worry about whether we should keep Tor running in the background, or
- * running multiple instances by accident.
+ * This avoids having to worry about whether we should keep Tor running in the background and maintaining
+ * an active control connection to it via Thali.
  * But it is SLOW. We (maybe) have to download directory information and (definitely) build
  * fresh circuits every time.
  *
- * ALSO it is not super robust. For example, when using TorCheckActivity, try to pause and resume
- * the app while still loading the URL the first time (or change the orientation).
- * The second Tor instance fails to start and everything gets messed up from then on.
- *
+ * ALSO it is not super robust. Stopping and starting Tor seems like a slightly dicey operation. Trying
+ * to start a new instance while one is running will fail, so we need to have a pretty good idea that
+ * old calls are done before making a new request.
+ * It might be safer to avoid starting and stopping Tor over and over if we need to use it frequently.
  * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
- * the HTTP. For now, we don't expect to download data very often, and must trust ourselves to avoid
+ * the HTTP. This could be a good place for a Service, if we expect to use Tor very often.
+ * For now, we don't expect to download data very often, and must trust ourselves to avoid
  * using it wrong.
  *
- * Note: assumes response will be in utf-8. If it's not, please retire your 90s web server.
+ * Note: assumes response will be in utf-8. If it's not, please retire your 90s web server (actually
+ * don't, I want to visit it).
  */
 public class TorURLLoader extends Thread {
     private static final String APP_NAME = "com.laserscorpion.redadalertas";
@@ -175,6 +178,19 @@ public class TorURLLoader extends Thread {
             // is there any scenario in which the socket would be closed
             e.printStackTrace();
             return;
+        }
+    }
+
+    /**
+     * Must call this if a request is outstanding and the listener needs to die.
+     */
+    public void cancel() {
+        try {
+            manager.stop();
+        } catch (IOException e) {
+            // this is bad. if we can't stop it now, we can't re-start again later
+            Log.e(TAG, "Uh oh, can't stop Tor.");
+            e.printStackTrace();
         }
     }
 

@@ -8,29 +8,35 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 
+/**
+ * Not intended for use in the final app, just to test if I'm connecting to Tor successfully
+ */
 public class TorCheckActivity extends AppCompatActivity implements URLDataReceiver {
+    private TorURLLoader loader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tor_check);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         try {
-            TorURLLoader loader = new TorURLLoader(this, new URL("https://check.torproject.org"), this);
+            loader = new TorURLLoader(this, new URL("https://check.torproject.org"), this);
             loader.start();
         } catch (MalformedURLException e) {
             // let's just not malform the URL, ok?
         }
+    }
 
+    @Override
+    protected void onDestroy() {
+        if (loader != null)
+            loader.cancel();
+        super.onDestroy();
     }
 
     @Override
     public void requestComplete(final boolean successful, final String data) {
+        loader = null;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
