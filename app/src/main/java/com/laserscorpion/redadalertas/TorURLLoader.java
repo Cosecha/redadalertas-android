@@ -3,6 +3,8 @@ package com.laserscorpion.redadalertas;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.laserscorpion.redadalertas.apachefix.ApacheResponseFactory;
@@ -58,6 +60,7 @@ public class TorURLLoader extends Thread {
     private URL url;
     private URLDataReceiver receiver;
     private boolean started = false;
+    private boolean starting = false;
 
      /**
       * After constructing this new URL loader, don't forget to call start()
@@ -71,6 +74,7 @@ public class TorURLLoader extends Thread {
         this.url = url;
         this.receiver = receiver;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
+        starting = true;
         TorStartThread thread = new TorStartThread(this);
         thread.start();
         getVersion();
@@ -239,7 +243,7 @@ public class TorURLLoader extends Thread {
     }
 
     private synchronized void waitForTor() throws SocketException {
-        while (!started) {
+        while (starting) {
             try {
                 wait();
                 break;
@@ -267,12 +271,16 @@ public class TorURLLoader extends Thread {
             boolean failedOnce = false;
 
             while (true) {
-                try {
-                    if (manager.isRunning())
-                        started = true;
-                    else
-                        started = manager.startWithRepeat(totalSecondsPerTorStartup, totalTriesPerTorStartup);
+                if (!haveInternetConnection())
                     break;
+                try {
+                    synchronized (parent) {
+                        if (manager.isRunning())
+                            started = true;
+                        else
+                            started = manager.startWithRepeat(totalSecondsPerTorStartup, totalTriesPerTorStartup);
+                        break;
+                    }
                 } catch (InterruptedException e) {
                     continue;
                 } catch (IOException e) {
@@ -283,8 +291,15 @@ public class TorURLLoader extends Thread {
                 }
             }
             synchronized (parent) {
+                starting = false;
                 parent.notify();
             }
+        }
+
+        private boolean haveInternetConnection() {
+            ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnected();
         }
     }
 
