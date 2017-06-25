@@ -11,7 +11,10 @@ import com.laserscorpion.redadalertas.apachefix.ApacheResponseFactory;
 import com.msopentech.thali.android.toronionproxy.AndroidOnionProxyManager;
 import com.msopentech.thali.toronionproxy.Utilities;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -42,7 +45,7 @@ import javax.net.ssl.SSLSocketFactory;
  * old calls are done before making a new request.
  * It might be safer to avoid starting and stopping Tor over and over if we need to use it frequently.
  * Perhaps we could consider making this reusable later, or splitting out the Tor handling and
- * the HTTP. This could be a good place for a Service, if we expect to use Tor very often.
+ * the HTTP bits. This could be a good place for a Service, if we expect to use Tor very often.
  * For now, we don't expect to download data very often, and must trust ourselves to avoid
  * using it wrong.
  *
@@ -58,10 +61,14 @@ public class TorURLLoader extends Thread {
     private Context context;
     private static final String TAG = "TorURLLoader";
     private AndroidOnionProxyManager manager;
-    private URL url;
+    private int redirectsRemaining = 10;
+    private URL originalUrl;
+    private URL previousUrl;
+    private URL url; // the one we are currently fetching
     private URLDataReceiver receiver;
     private boolean started = false;
     private boolean starting = false;
+    private SSLSocket socket;
 
      /**
       * After constructing this new URL loader, don't forget to call start()
@@ -72,7 +79,9 @@ public class TorURLLoader extends Thread {
      */
     TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
         this.context = context;
+        this.originalUrl = url;
         this.url = url;
+        this.previousUrl = url;
         this.receiver = receiver;
         manager = new AndroidOnionProxyManager(context, fileStorageLocation);
         starting = true;
@@ -81,9 +90,13 @@ public class TorURLLoader extends Thread {
         getVersion();
     }
 
+    /**
+     * The number of ways for receiver.requestComplete() to be called smells of spaghetti
+     * Maybe rethink this, maybe throw some more exceptions to all arrive at the failure case.
+     */
     public void run() {
         try {
-            String request = createRequest(url);
+
             try {
                 waitForTor();
             } catch (SocketException e) {
@@ -91,33 +104,34 @@ public class TorURLLoader extends Thread {
             }
 
             try {
-                SSLSocket socket = connectToServerViaTor(url);
-                sendRequest(socket, request);
-                String result = readStream(socket);
-                HttpResponse response = ApacheResponseFactory.parse(result);
-                handleResponse(response);
-            } catch (SocketException e) { // connectToServerWithTor()
+                socket = connectToServerViaTor(url);
+                createSendAndHandleRequest();
             } catch (SocketTimeoutException e) {
                 throw new Exception(context.getString(R.string.timeout_error), e);
+            } catch (SocketException e) { // connectToServerViaTor()
                 throw new Exception(context.getString(R.string.server_connection_error), e);
-            } catch (IOException e) { // readStream()
+            } catch (IOException e) { // createSendAndHandleRequest() / readStream()
+                e. printStackTrace();
                 throw new Exception(context.getString(R.string.network_download_error), e);
             }
         } catch (final Exception e) {
             receiver.requestComplete(false, e.getMessage());
         }
 
-        try {
-            manager.stop();
-        } catch (IOException e) {
-            // this is bad. if we can't stop it now, we can't re-start again later
-            Log.e(TAG, "Uh oh, can't stop Tor.");
-            e.printStackTrace();
-        }
+        stopTor();
     }
 
-    private void handleResponse(HttpResponse response) {
+    private void createSendAndHandleRequest() throws SocketTimeoutException, IOException {
+        String request = createRequest(url);
+        sendRequest(socket, request);
+        String result = readStream(socket);
+        HttpResponse response = ApacheResponseFactory.parse(result);
+        handleResponse(response);
+    }
+
+    private void handleResponse(HttpResponse response) throws IOException {
         int statusCode = response.getStatusLine().getStatusCode();
+        Log.d(TAG, "Received an HTTP response: " + statusCode);
         if (statusCode < 200) {
             Log.d(TAG, "Received an HTTP status code we don't care about: " + statusCode);
             return;
@@ -131,16 +145,53 @@ public class TorURLLoader extends Thread {
                 receiver.requestComplete(false, null);
             }
         } else if (statusCode >= 300 && statusCode < 400) {
-            // !!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!
-            // todo we probably do want to handle redirects!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!
+            if (statusCode != org.apache.http.HttpStatus.SC_USE_PROXY) {
+                handleRedirect(response);
+            } else
+                receiver.requestComplete(false, "ignoring proxy instruction, who knows what is going on");
         } else {
             Log.e(TAG, "HTTP request failed! Status: " + statusCode);
             receiver.requestComplete(false, null);
         }
+    }
 
+    /**
+     * Note that this is ultimately called recursively, but terminates when redirectsRemaining == 0
+     * @param response
+     * @throws IOException sometimes? Hopefully not
+     */
+    private void handleRedirect(HttpResponse response) throws IOException {
+        Log.d(TAG, "Handling redirect");
+        if (redirectsRemaining > 0) {
+            redirectsRemaining--;
+            Header location = response.getFirstHeader(HttpHeaders.LOCATION);
+            if (location == null) {
+                // probably throw an HttpException
+                receiver.requestComplete(false, "Missing redirect");
+                return;
+            }
+            URL redirect = new URL(location.getValue());
+            if (!url.equals(redirect) && !previousUrl.equals(redirect) && !originalUrl.equals(redirect)) {
+                previousUrl = url;
+                url = redirect;
+                socket.close();
+                socket = connectToServerViaTor(url);
+                createSendAndHandleRequest();
+            } else
+                receiver.requestComplete(false, "Circular redirect");
+        } else
+            receiver.requestComplete(false, "Too many redirects");
+    }
+
+    private void stopTor() {
+        Log.d(TAG, "stopping Tor, hope you're done!");
+        try {
+            manager.stop();
+        } catch (IOException e) {
+            // this is bad. if we can't stop it now, we can't re-start again later
+            Log.e(TAG, "Uh oh, can't stop Tor.");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -148,7 +199,12 @@ public class TorURLLoader extends Thread {
      * can we really get away with only writing this much HTTP?
      */
     private String createRequest(URL url) {
-        String request = "GET /" + url.getFile() + " HTTP/1.1"  + CRLF;
+        /* Using HTTP 1.0 here to simplify detecting the end of the response, since we are doing this
+            ourselves, not via some fancy HTTP library. If you switch to HTTP 1.1, you will need to change
+            readStream() to understand when a single reply is done, since it can't just detect that the
+            stream is closed. */
+        // todo handle lack of '/' in file, if any
+        String request = "GET " + url.getFile() + " HTTP/1.0"  + CRLF;
         request += "Host: " + url.getHost() + CRLF;
         request += "User-Agent: " + context.getString(R.string.user_agent) + " " + version + CRLF;
         request += CRLF;
@@ -180,6 +236,7 @@ public class TorURLLoader extends Thread {
             writer = new OutputStreamWriter(socket.getOutputStream(), CHARSET);
             writer.write(request);
             writer.flush();
+            Log.d(TAG, "Sent request: " + request);
         } catch (IOException e) {
             // todo why would this happen?
             // is there any scenario in which the socket would be closed
@@ -192,29 +249,18 @@ public class TorURLLoader extends Thread {
      * Must call this if a request is outstanding and the listener needs to die.
      */
     public void cancel() {
-        try {
-            manager.stop();
-        } catch (IOException e) {
-            // this is bad. if we can't stop it now, we can't re-start again later
-            Log.e(TAG, "Uh oh, can't stop Tor.");
-            e.printStackTrace();
-        }
+        stopTor();
     }
 
-    private String readStream(Socket socket) throws IOException {
-        InputStreamReader stream = null;
-        try {
-            stream = new InputStreamReader(socket.getInputStream(), CHARSET);
-        } catch (IOException e) {
-            // todo is this actually possible since we just set up this socket?
-            e.printStackTrace();
-        }
+    private String readStream(Socket socket) throws SocketTimeoutException, IOException {
+        InputStreamReader stream = new InputStreamReader(socket.getInputStream(), CHARSET);
         BufferedReader reader = new BufferedReader(stream);
         String result = "";
         char buf[] = new char[100];
         int read = reader.read(buf, 0, buf.length);
         while (read >= 0) {
             String justRead = new String(buf, 0, read);
+            //Log.d(TAG, "read: " + justRead);
             result += justRead;
             read = reader.read(buf, 0, buf.length);
         }
@@ -256,6 +302,8 @@ public class TorURLLoader extends Thread {
             throw new SocketException("Couldn't connect to Tor.");
     }
 
+    // when i get around to it
+    private class HttpFailureException extends Exception { }
 
     /**
      * We could also think about using a thread pool. Java has some such kind of thing. And then there's

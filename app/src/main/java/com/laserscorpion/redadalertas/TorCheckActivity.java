@@ -12,7 +12,10 @@ import java.net.URL;
  * Not intended for use in the final app, just to test if I'm connecting to Tor successfully
  */
 public class TorCheckActivity extends AppCompatActivity implements URLDataReceiver {
+    //private static final String URL = "https://check.torproject.org/";
+    private static final String URL = "https://eff.org/";
     private TorURLLoader loader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +23,7 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
         setContentView(R.layout.activity_tor_check);
 
         try {
-            loader = new TorURLLoader(this, new URL("https://check.torproject.org"), this);
+            loader = new TorURLLoader(this, new URL(URL), this);
             loader.start();
         } catch (MalformedURLException e) {
             // let's just not malform the URL, ok?
