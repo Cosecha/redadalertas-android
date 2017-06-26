@@ -12,6 +12,7 @@ import com.msopentech.thali.android.toronionproxy.AndroidOnionProxyManager;
 import com.msopentech.thali.toronionproxy.Utilities;
 
 import org.apache.http.Header;
+import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -90,10 +91,6 @@ public class TorURLLoader extends Thread {
         getVersion();
     }
 
-    /**
-     * The number of ways for receiver.requestComplete() to be called smells of spaghetti
-     * Maybe rethink this, maybe throw some more exceptions to all arrive at the failure case.
-     */
     public void run() {
         try {
 
@@ -110,18 +107,20 @@ public class TorURLLoader extends Thread {
                 throw new Exception(context.getString(R.string.timeout_error), e);
             } catch (SocketException e) { // connectToServerViaTor()
                 throw new Exception(context.getString(R.string.server_connection_error), e);
+            } catch (HttpException e) {
+                throw new Exception(context.getString(R.string.http_error), e);
             } catch (IOException e) { // createSendAndHandleRequest() / readStream()
-                e. printStackTrace();
                 throw new Exception(context.getString(R.string.network_download_error), e);
             }
         } catch (final Exception e) {
+            e. printStackTrace();
             receiver.requestComplete(false, e.getMessage());
         }
 
         stopTor();
     }
 
-    private void createSendAndHandleRequest() throws SocketTimeoutException, IOException {
+    private void createSendAndHandleRequest() throws SocketTimeoutException, HttpException, IOException {
         String request = createRequest(url);
         sendRequest(socket, request);
         String result = readStream(socket);
@@ -129,7 +128,7 @@ public class TorURLLoader extends Thread {
         handleResponse(response);
     }
 
-    private void handleResponse(HttpResponse response) throws IOException {
+    private void handleResponse(HttpResponse response) throws IOException, HttpException {
         int statusCode = response.getStatusLine().getStatusCode();
         Log.d(TAG, "Received an HTTP response: " + statusCode);
         if (statusCode < 200) {
@@ -138,20 +137,17 @@ public class TorURLLoader extends Thread {
         } else if (statusCode >= 200 && statusCode < 300) {
             try {
                 String responseBody = EntityUtils.toString(response.getEntity());
-                receiver.requestComplete(true, responseBody);
+                receiver.requestComplete(true, responseBody); // this is the normal case
             } catch (IOException e) {
-                Log.e(TAG, "IOExceptions are extremely nonspecific. The request completed but some unknown thing failed. Have fun!");
-                e.printStackTrace();
-                receiver.requestComplete(false, null);
+                throw new IOException("IOExceptions are extremely nonspecific in this context. The request completed but some unknown thing failed. Have fun!", e);
             }
         } else if (statusCode >= 300 && statusCode < 400) {
             if (statusCode != org.apache.http.HttpStatus.SC_USE_PROXY) {
                 handleRedirect(response);
             } else
-                receiver.requestComplete(false, "ignoring proxy instruction, who knows what is going on");
+                throw new HttpException("ignoring proxy instruction, who knows what is going on");
         } else {
-            Log.e(TAG, "HTTP request failed! Status: " + statusCode);
-            receiver.requestComplete(false, null);
+            throw new HttpException("HTTP request failed! Status: " + statusCode);
         }
     }
 
@@ -160,16 +156,13 @@ public class TorURLLoader extends Thread {
      * @param response
      * @throws IOException sometimes? Hopefully not
      */
-    private void handleRedirect(HttpResponse response) throws IOException {
+    private void handleRedirect(HttpResponse response) throws IOException, HttpException {
         Log.d(TAG, "Handling redirect");
         if (redirectsRemaining > 0) {
             redirectsRemaining--;
             Header location = response.getFirstHeader(HttpHeaders.LOCATION);
-            if (location == null) {
-                // probably throw an HttpException
-                receiver.requestComplete(false, "Missing redirect");
-                return;
-            }
+            if (location == null)
+                throw new HttpException("Missing redirect");
             URL redirect = new URL(location.getValue());
             if (!url.equals(redirect) && !previousUrl.equals(redirect) && !originalUrl.equals(redirect)) {
                 previousUrl = url;
@@ -178,9 +171,10 @@ public class TorURLLoader extends Thread {
                 socket = connectToServerViaTor(url);
                 createSendAndHandleRequest();
             } else
-                receiver.requestComplete(false, "Circular redirect");
+                throw new HttpException("Circular redirect");
         } else
-            receiver.requestComplete(false, "Too many redirects");
+            throw new HttpException("Too many redirects");
+
     }
 
     private void stopTor() {
@@ -301,9 +295,6 @@ public class TorURLLoader extends Thread {
         if (!started)
             throw new SocketException("Couldn't connect to Tor.");
     }
-
-    // when i get around to it
-    private class HttpFailureException extends Exception { }
 
     /**
      * We could also think about using a thread pool. Java has some such kind of thing. And then there's

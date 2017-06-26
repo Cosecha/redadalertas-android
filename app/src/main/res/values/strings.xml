@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">RedadAlertas</string>
     <string name="user_agent">RedadAlertas Android</string>
-    <!-- unclear if the following strings will ever be user visible, but better safe than sorry here -->
+    <!-- unclear if the following strings will ever be user visible, but better safe than sorry here.
+        Using resources makes them easier to translate if we have to.
+        I don't expect that these strings, used in exceptions, will be shown as the error message...
+        but you never know what kind of rush we'll be in when we end up using them...-->
     <string name="network_download_error">Problem downloading latest alerts from network.</string>
     <string name="tor_start_error">Can\'t connect to the network. Try again later?</string>
     <string name="server_connection_error">Can\'t connect to RedadAlertas server. Try again later?</string>
     <string name="timeout_error">No response from RedadAlertas server. Try again later? (Is your internet connection working?)</string>
+    <string name="http_error">Can\'t download data from RedadAlertas server. Make sure your app is up to date, and maybe try again later.</string>
     <!-- =========================================================================================== -->
 </resources>

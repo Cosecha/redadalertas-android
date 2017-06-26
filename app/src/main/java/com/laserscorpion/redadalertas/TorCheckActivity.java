@@ -12,8 +12,9 @@ import java.net.URL;
  * Not intended for use in the final app, just to test if I'm connecting to Tor successfully
  */
 public class TorCheckActivity extends AppCompatActivity implements URLDataReceiver {
-    //private static final String URL = "https://check.torproject.org/";
-    private static final String URL = "https://eff.org/";
+    private static final String URL = "https://check.torproject.org/";
+    //private static final String URL = "https://eff.org/"; // tests redirect
+    //private static final String URL = "https://eff.xjf/"; // tests (a) failure
     private TorURLLoader loader;
 
 
