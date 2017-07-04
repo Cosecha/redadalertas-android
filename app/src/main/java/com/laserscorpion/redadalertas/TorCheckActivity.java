@@ -29,6 +29,12 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
         } catch (MalformedURLException e) {
             // let's just not malform the URL, ok?
         }
+        try {
+            DBTester tester = new DBTester(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -52,6 +58,5 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
 
             }
         });
-
     }
 }
