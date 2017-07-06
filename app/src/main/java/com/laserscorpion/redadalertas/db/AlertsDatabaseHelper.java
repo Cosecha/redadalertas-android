@@ -15,7 +15,7 @@ import java.util.Date;
 
 
 public class AlertsDatabaseHelper extends SQLiteOpenHelper {
-    private static final String LAT_LONG_SEP = ",  ";
+    private static final String LAT_LONG_SEP = ", ";
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "Alerts.db";
@@ -119,7 +119,30 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
             Alert alert = createAlert(results);
             alerts.add(alert);
         }
+        results.close();
         return alerts;
+    }
+
+    public long getMostRecentAlertTime() {
+        long time = Long.MIN_VALUE;
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT MAX(" + AlertsDatabaseContract.Alerts.COLUMN_NAME_TIME + ") FROM " + AlertsDatabaseContract.Alerts.TABLE_NAME;
+        Cursor result = db.rawQuery(sql, null);
+        if (result.moveToFirst())
+            time = result.getLong(0);
+        result.close();
+        return time;
+    }
+
+    public long getHighestID() {
+        long time = Long.MIN_VALUE;
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT MAX(" + AlertsDatabaseContract.Alerts.COLUMN_NAME_ALERT_ID + ") FROM " + AlertsDatabaseContract.Alerts.TABLE_NAME;
+        Cursor result = db.rawQuery(sql, null);
+        if (result.moveToFirst())
+            time = result.getInt(0);
+        result.close();
+        return time;
     }
 
     private Alert createAlert(Cursor result) {
