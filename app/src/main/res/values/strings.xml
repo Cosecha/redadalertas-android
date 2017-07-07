@@ -10,5 +10,6 @@
     <string name="server_connection_error">Can\'t connect to RedadAlertas server. Try again later?</string>
     <string name="timeout_error">No response from RedadAlertas server. Try again later? (Is your internet connection working?)</string>
     <string name="http_error">Can\'t download data from RedadAlertas server. Make sure your app is up to date, and maybe try again later.</string>
+    <string name="title_activity_jsontest">JSONTestActivity</string>
     <!-- =========================================================================================== -->
 </resources>

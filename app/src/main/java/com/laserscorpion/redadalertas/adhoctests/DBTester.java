@@ -1,8 +1,9 @@
-package com.laserscorpion.redadalertas;
+package com.laserscorpion.redadalertas.adhoctests;
 
 import android.content.Context;
 import android.location.Location;
 
+import com.laserscorpion.redadalertas.Alert;
 import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
 
 import java.util.ArrayList;

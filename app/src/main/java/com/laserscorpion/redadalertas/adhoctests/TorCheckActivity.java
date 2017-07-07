@@ -1,9 +1,13 @@
-package com.laserscorpion.redadalertas;
+package com.laserscorpion.redadalertas.adhoctests;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
+
+import com.laserscorpion.redadalertas.R;
+import com.laserscorpion.redadalertas.TorURLLoader;
+import com.laserscorpion.redadalertas.URLDataReceiver;
 
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -13,10 +17,10 @@ import java.net.URL;
  * Not intended for use in the final app, just to test if I'm connecting to Tor successfully
  */
 public class TorCheckActivity extends AppCompatActivity implements URLDataReceiver {
-    //private static final String URL = "https://check.torproject.org/"; // tests Tor
+    private static final String URL = "https://check.torproject.org/"; // tests Tor
     //private static final String URL = "https://eff.org/"; // tests redirect
     //private static final String URL = "https://eff.xjf/"; // tests (one type of) failure
-    private static final String URL = "https://laserscorpion.com/other/example.json";
+    //private static final String URL = "https://laserscorpion.com/other/example.json";
 
     private TorURLLoader loader;
 
@@ -31,20 +35,6 @@ public class TorCheckActivity extends AppCompatActivity implements URLDataReceiv
             loader.start();
         } catch (MalformedURLException e) {
             // let's just not malform the URL, ok?
-        }
-
-        try {
-            DBTester tester = new DBTester(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
-            Log.e("!!!!!", "!!!!!!!!!!!!!!!!!!!!!!!!");
         }
     }
 

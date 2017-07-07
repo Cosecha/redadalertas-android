@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import com.laserscorpion.redadalertas.apachefix.ApacheResponseFactory;
 import com.msopentech.thali.android.toronionproxy.AndroidOnionProxyManager;
 import com.msopentech.thali.toronionproxy.Utilities;
 
@@ -15,7 +14,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -78,7 +76,7 @@ public class TorURLLoader extends Thread {
      * @param receiver since all this networking is slow, you'll need to wait for your response, so
      *                 implement this to listen for it
      */
-    TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
+    public TorURLLoader(Context context, URL url, URLDataReceiver receiver) {
         this.context = context;
         this.originalUrl = url;
         this.url = url;

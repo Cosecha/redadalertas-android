@@ -40,7 +40,7 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + AlertsDatabaseContract.AlertTypes.TABLE_NAME + " (" +
                     AlertsDatabaseContract.AlertTypes.COLUMN_NAME_ALERT_TYPE_ID + " INTEGER PRIMARY KEY," +
                     AlertsDatabaseContract.AlertTypes.COLUMN_NAME_ALERT_TYPE_NAME + " TEXT)";
-
+    private int insertsPending = 0; // reinventing the semaphore via the monitor =P
 
     public AlertsDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -101,7 +101,8 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
      * @param time since this time, see?
      * @return all the alerts since the cutoff time, in all locations
      */
-    public ArrayList<Alert> getAlertsSince(Date time) {
+    public synchronized ArrayList<Alert> getAlertsSince(Date time) {
+        waitForInsert();
         SQLiteDatabase db = getReadableDatabase();
         long cutoffTimeUnixUTC = time.getTime();
         /*String sql = "SELECT * FROM "   + AlertsDatabaseContract.Alerts.TABLE_NAME + " LEFT JOIN " +
@@ -123,7 +124,8 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
         return alerts;
     }
 
-    public long getMostRecentAlertTime() {
+    public synchronized long getMostRecentAlertTime() {
+        waitForInsert();
         long time = Long.MIN_VALUE;
         SQLiteDatabase db = getReadableDatabase();
         String sql = "SELECT MAX(" + AlertsDatabaseContract.Alerts.COLUMN_NAME_TIME + ") FROM " + AlertsDatabaseContract.Alerts.TABLE_NAME;
@@ -134,7 +136,8 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
         return time;
     }
 
-    public long getHighestID() {
+    public synchronized long getHighestID() {
+        waitForInsert();
         long time = Long.MIN_VALUE;
         SQLiteDatabase db = getReadableDatabase();
         String sql = "SELECT MAX(" + AlertsDatabaseContract.Alerts.COLUMN_NAME_ALERT_ID + ") FROM " + AlertsDatabaseContract.Alerts.TABLE_NAME;
@@ -143,6 +146,14 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
             time = result.getInt(0);
         result.close();
         return time;
+    }
+
+    private synchronized void waitForInsert() {
+        while (insertsPending > 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
     }
 
     private Alert createAlert(Cursor result) {
@@ -175,26 +186,38 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
         return location;
     }
 
-    public void addNewAlerts(ArrayList<Alert> newEvents) {
-        new AlertAddingTask().execute(newEvents);
+    public synchronized void addNewAlerts(ArrayList<Alert> newEvents) {
+        insertsPending++;
+        new AlertAddingTask(this).execute(newEvents);
     }
 
     private class AlertAddingTask extends AsyncTask<ArrayList<Alert>, Void, Void> {
+        private AlertsDatabaseHelper parent;
+
+        public AlertAddingTask(AlertsDatabaseHelper parent) {
+            super();
+            this.parent = parent;
+        }
+
         @Override
         protected Void doInBackground(ArrayList<Alert>... alerts) {
-            SQLiteDatabase db = getWritableDatabase();
-            for (Alert alert : alerts[0]) {
-                ContentValues values = new ContentValues();
-                String location = alert.location.getLatitude() + LAT_LONG_SEP + alert.location.getLongitude();
-                long UnixMillisUTC = alert.time.getTime(); // just so you are aware what this is
-                values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_ALERT_ID, alert.ID);
-                values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_LOCATION, location);
-                values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_TIME, UnixMillisUTC);
-                values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_AGENCY, alert.agency.ordinal());
-                values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_TYPE, alert.type.ordinal());
-                db.insert(AlertsDatabaseContract.Alerts.TABLE_NAME, null, values);
+            synchronized (parent) {
+                SQLiteDatabase db = getWritableDatabase();
+                for (Alert alert : alerts[0]) {
+                    ContentValues values = new ContentValues();
+                    String location = alert.location.getLatitude() + LAT_LONG_SEP + alert.location.getLongitude();
+                    long UnixMillisUTC = alert.time.getTime(); // just so you are aware what this is
+                    values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_ALERT_ID, alert.ID);
+                    values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_LOCATION, location);
+                    values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_TIME, UnixMillisUTC);
+                    values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_AGENCY, alert.agency.ordinal());
+                    values.put(AlertsDatabaseContract.Alerts.COLUMN_NAME_TYPE, alert.type.ordinal());
+                    db.insert(AlertsDatabaseContract.Alerts.TABLE_NAME, null, values);
+                }
+                insertsPending--;
+                parent.notify();
+                return null;
             }
-            return null;
         }
     }
 }

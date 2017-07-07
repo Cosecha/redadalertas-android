@@ -2,6 +2,8 @@ package com.laserscorpion.redadalertas;
 
 import android.location.Location;
 
+import com.laserscorpion.redadalertas.db.AlertsDatabaseContract;
+
 import java.util.Date;
 
 public class Alert {
@@ -18,4 +20,11 @@ public class Alert {
     public Location location;
     public AlertType type;
     public Agency agency;
+
+    @Override
+    public String toString() {
+        if (time == null || location == null || type == null || agency == null)
+            return null;
+        return time + ": " + agency + " " + type + " at (" + location.getLatitude() + ", " + location.getLongitude() + ")";
+    }
 }

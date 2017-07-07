@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.apachefix;
+package com.laserscorpion.redadalertas;
 
 import android.util.Log;
 
