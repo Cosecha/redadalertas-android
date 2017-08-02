@@ -187,8 +187,10 @@ public class AlertsDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public synchronized void addNewAlerts(ArrayList<Alert> newEvents) {
-        insertsPending++;
-        new AlertAddingTask(this).execute(newEvents);
+        if (newEvents != null && newEvents.size() > 0) {
+            insertsPending++;
+            new AlertAddingTask(this).execute(newEvents);
+        }
     }
 
     private class AlertAddingTask extends AsyncTask<ArrayList<Alert>, Void, Void> {

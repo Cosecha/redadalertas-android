@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">RedadAlertas</string>
     <string name="user_agent">RedadAlertas Android</string>
+    <string name="alert_download_failure_message">There are alerts to download (which may be for some other part of the country), but we haven\'t been able to get from the RedadAlertas server after repeated tries. Make sure you\'re connected to the internet, and maybe check manually later. Also make sure your app is up to date.</string>
     <!-- unclear if the following strings will ever be user visible, but better safe than sorry here.
         Using resources makes them easier to translate if we have to.
         I don't expect that these strings, used in exceptions, will be shown as the error message...
