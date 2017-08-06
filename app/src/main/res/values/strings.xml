@@ -15,5 +15,6 @@
     <string name="http_error">Can\'t download data from RedadAlertas server. Make sure your app is up to date, and maybe try again later.</string>
     <string name="title_activity_jsontest">JSONTestActivity</string>
     <string name="title_activity_alert_list">AlertListActivity</string>
+    <string name="title_activity_alert_map">Map</string>
     <!-- =========================================================================================== -->
 </resources>

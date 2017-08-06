@@ -13,7 +13,7 @@ import java.security.SecureRandom;
  */
 public class NotificationFactory {
     public static final int ERROR_NOTIFICATION_ID = 875916473; // some arbitrary number
-    private static final long[] pattern = {0, 2000L, 1000L, 2000L};
+    private static final long[] pattern = {0, 1500L, 1000L, 1500L};
 
     public static Notification createErrorNotification(Context context, String text) {
         Notification.Builder builder = new Notification.Builder(context);
