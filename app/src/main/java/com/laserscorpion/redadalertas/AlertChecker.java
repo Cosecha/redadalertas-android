@@ -17,10 +17,11 @@ import java.util.Date;
 
 public class AlertChecker implements URLDataReceiver {
     private static final String TAG = "AlertChecker";
+    private static final int SECONDS_UNTIL_RETRY = 60;
     private static String ALERT_URL = "https://laserscorpion.com/other/example.json";
     private static boolean retryPending = false;
     private Context context;
-    private int attemptsRemaining = 0;
+    private int attemptsRemaining = 5;
 
     public AlertChecker(Context context) {
         this.context = context;
@@ -39,10 +40,10 @@ public class AlertChecker implements URLDataReceiver {
 
     @Override
     public void requestComplete(boolean successful, String data) {
+        synchronized (AlertChecker.class) {
+            retryPending = false;
+        }
         if (successful) {
-            synchronized (AlertChecker.class) {
-                retryPending = false;
-            }
             cancelErrorNotification();
             AlertsDatabaseHelper db = new AlertsDatabaseHelper(context);
             try {
@@ -106,14 +107,31 @@ public class AlertChecker implements URLDataReceiver {
     }
 
     private void scheduleRetry() {
-        Log.d(TAG, "Scheduling retry");
         synchronized (AlertChecker.class) {
             if (!retryPending) {
+                Log.d(TAG, "Scheduling retry");
                 retryPending = true;
                 attemptsRemaining--;
-                // todo
+                sleepUninteruptibly(SECONDS_UNTIL_RETRY);
+                if (retryPending) { // it might not be after sleeping
+                    Log.d(TAG, "Attempting download retry");
+                    downloadAlerts(); // we're still holding the monitor lock but this method call mainly defers to another thread so I'm not worried
+                }
             }
+        }
+    }
 
+    private void sleepUninteruptibly(int seconds) {
+        long msRemaining = seconds * 1000;
+        while (msRemaining > 0) {
+            long start = new Date().getTime();
+            try {
+                Thread.sleep(msRemaining);
+                return;
+            } catch (InterruptedException e) {
+                long now = new Date().getTime();
+                msRemaining -= (now - start);
+            }
         }
     }
 }

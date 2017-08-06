@@ -4,13 +4,8 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
 
 import java.security.SecureRandom;
-
-import static android.app.Notification.DEFAULT_LIGHTS;
-import static android.app.Notification.DEFAULT_SOUND;
-import static android.app.Notification.DEFAULT_VIBRATE;
 
 /**
  * I don't particularly want to do this in this way. I would be happy to sublcass Notification with
