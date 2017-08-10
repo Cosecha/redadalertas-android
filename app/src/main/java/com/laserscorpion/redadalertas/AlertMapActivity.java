@@ -1,7 +1,9 @@
 package com.laserscorpion.redadalertas;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,6 +15,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class AlertMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private Alert alert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +25,9 @@ public class AlertMapActivity extends FragmentActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Intent creationIntent = getIntent();
+        alert = (Alert)creationIntent.getSerializableExtra(NotificationFactory.ALERT_EXTRA_NAME);
     }
 
 
@@ -38,9 +44,24 @@ public class AlertMapActivity extends FragmentActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng dangerLocation = new LatLng(alert.location.getLatitude(), alert.location.getLongitude());
+
+        String eventType = alert.getEventType(this);
+
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(14f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(dangerLocation));
+        mMap.addMarker(new MarkerOptions().position(dangerLocation).title(eventType));
+
+        TextView alertHeading = (TextView)findViewById(R.id.alert_type_heading);
+        alertHeading.setText(eventType);
+
+        TextView timeField = (TextView)findViewById(R.id.raid_time_cell);
+        timeField.setText(alert.time.toString());
+
+        TextView agencyField = (TextView)findViewById(R.id.raid_agency_cell);
+        String agency = alert.getAgency(this);
+        agencyField.setText(agency);
     }
+
+
 }

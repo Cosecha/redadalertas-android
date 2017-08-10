@@ -1,8 +1,63 @@
-<fragment android:id="@+id/map"
-          android:name="com.google.android.gms.maps.SupportMapFragment"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:map="http://schemas.android.com/apk/res-auto"
-          xmlns:tools="http://schemas.android.com/tools"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          tools:context="com.laserscorpion.redadalertas.AlertMapActivity"/>
+<!-- RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_height="fill_parent"
+                android:layout_width="fill_parent"
+                android:layout_gravity="top"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="16dp" -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:orientation="vertical"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:paddingTop="16dp" >
+
+    <fragment android:id="@+id/map"
+              android:name="com.google.android.gms.maps.SupportMapFragment"
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:map="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="0dp"
+              android:layout_weight=".7"
+              android:layout_centerHorizontal="true"
+              android:paddingBottom="16dp"
+              tools:context="com.laserscorpion.redadalertas.AlertMapActivity"
+              />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".3"
+        android:stretchColumns="1">
+        <TableRow>
+            <TextView
+                android:id="@+id/alert_type_heading"
+                android:padding="2dp"
+                android:layout_span="2"
+                android:textAlignment="center" />
+        </TableRow>
+        <TableRow>
+            <TextView android:id="@+id/raid_agency_label"
+                      android:padding="2dp"
+                      android:text="@string/label_agency"
+                />
+            <TextView android:id="@+id/raid_type_label"
+                      android:padding="2dp"
+                      android:text="@string/label_alert_time"
+                      android:gravity="right"
+                />
+        </TableRow>
+        <TableRow>
+            <TextView android:id="@+id/raid_agency_cell"
+                      android:padding="2dp" />
+            <TextView android:id="@+id/raid_time_cell"
+                      android:padding="2dp"
+                      android:gravity="right" />
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>
+<!-- /RelativeLayout -->

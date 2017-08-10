@@ -13,6 +13,8 @@ import java.security.SecureRandom;
  */
 public class NotificationFactory {
     public static final int ERROR_NOTIFICATION_ID = 875916473; // some arbitrary number
+    public static final String ERROR_TEXT_EXTRA_NAME = "com.laserscorpion.redadalertas.NotificationFactory.Error";
+    public static final String ALERT_EXTRA_NAME = "com.laserscorpion.redadalertas.NotificationFactory.Alert";
     private static final long[] pattern = {0, 1500L, 1000L, 1500L};
 
     public static Notification createErrorNotification(Context context, String text) {
@@ -25,6 +27,7 @@ public class NotificationFactory {
 
         Intent mainActivity = new Intent(context, AlertListActivity.class);
         mainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mainActivity.putExtra(ERROR_TEXT_EXTRA_NAME, text);
         PendingIntent loadErrorActivity = PendingIntent.getActivity(context, 0, mainActivity, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(loadErrorActivity);
 
@@ -42,7 +45,7 @@ public class NotificationFactory {
 
         Intent mapActivity = new Intent(context, AlertMapActivity.class);
         mapActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mapActivity.putExtra("alert", alert.toString()); // later, need to make Alert serializable for this
+        mapActivity.putExtra(ALERT_EXTRA_NAME, alert);
         int requestCode = new SecureRandom().nextInt(); // not clear if necessary, but we don't want two pending intents for different alerts to risk being equal
         PendingIntent alertActivity = PendingIntent.getActivity(context, requestCode, mapActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
