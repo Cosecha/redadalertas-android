@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class Alert implements Serializable {
+    public static final String ALERT_EXTRA_NAME = "com.laserscorpion.redadalertas.Alert";
+
     public enum Agency {
         ICE, CBP, LOCAL_POLICE, LOCAL_SHERIFF
     }

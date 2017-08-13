@@ -27,7 +27,7 @@ public class AlertMapActivity extends FragmentActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
 
         Intent creationIntent = getIntent();
-        alert = (Alert)creationIntent.getSerializableExtra(NotificationFactory.ALERT_EXTRA_NAME);
+        alert = (Alert)creationIntent.getSerializableExtra(Alert.ALERT_EXTRA_NAME);
     }
 
 

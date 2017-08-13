@@ -111,10 +111,10 @@ public class AlertChecker implements URLDataReceiver {
             if (!retryPending) {
                 Log.d(TAG, "Scheduling retry");
                 retryPending = true;
-                attemptsRemaining--;
                 sleepUninterruptibly(SECONDS_UNTIL_RETRY);
                 if (retryPending) { // it might not be after sleeping
                     Log.d(TAG, "Attempting download retry");
+                    attemptsRemaining--;
                     downloadAlerts(); // we're still holding the monitor lock but this method call mainly defers to another thread so I'm not worried
                 }
             }
