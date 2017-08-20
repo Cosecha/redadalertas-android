@@ -1,13 +1,16 @@
 package com.laserscorpion.redadalertas;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.preference.PreferenceManager;
 
 import com.laserscorpion.redadalertas.db.AlertsDatabaseContract;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 public class Alert implements Serializable {
     public static final String ALERT_EXTRA_NAME = "com.laserscorpion.redadalertas.Alert";
@@ -77,5 +80,9 @@ public class Alert implements Serializable {
             default:
                 return context.getString(R.string.agency_name_unknown);
         }
+    }
+
+    public boolean isOfInterest(Context context) {
+        return true;
     }
 }

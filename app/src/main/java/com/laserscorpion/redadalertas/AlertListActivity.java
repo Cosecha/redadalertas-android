@@ -1,22 +1,13 @@
 package com.laserscorpion.redadalertas;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
+import android.app.ActionBar;
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.R.layout.*;
-import android.widget.ListView;
 
 import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
 
@@ -62,29 +53,4 @@ public class AlertListActivity extends ListActivity {
         getListView().setOnItemClickListener(clickListener);
     }
 
-    public static class ErrorDialog extends DialogFragment {
-        private static final String MESSAGE_KEY = "message";
-
-        static ErrorDialog newInstance(String message) {
-            ErrorDialog dialog = new ErrorDialog();
-            Bundle args = new Bundle();
-            args.putString(MESSAGE_KEY, message);
-            dialog.setArguments(args);
-            return dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            String message = getArguments().getString(MESSAGE_KEY);
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle(getString(R.string.error_title));
-            builder.setMessage(message);
-            builder.setCancelable(true);
-            builder.setNegativeButton(getString(R.string.error_dialog_acknowledge_button), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {}
-            });
-            return builder.create();
-        }
-    }
 }

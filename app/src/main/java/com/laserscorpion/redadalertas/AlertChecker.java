@@ -77,13 +77,9 @@ public class AlertChecker implements URLDataReceiver {
 
     private void notifyIfApplicable(ArrayList<Alert> newAlerts) {
         for (Alert alert : newAlerts) {
-            if (isOfInterest(alert))
+            if (alert.isOfInterest(context))
                 notifyAlert(alert);
         }
-    }
-
-    private boolean isOfInterest(Alert alert) {
-        return true; // TODO
     }
 
     private void notifyAlert(Alert alert) {
