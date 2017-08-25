@@ -36,6 +36,9 @@
     <string name="title_activity_alert_map">Alert Location</string>
     <string name="title_activity_location_list">Saved Locations</string>
 
+    <string name="location_action_delete_location">Delete location</string>
+    <string name="location_action_keep_location">Keep location</string>
+
     <string name="action_add_location">Add location</string>
     <!-- =========================================================================================== -->
 </resources>
