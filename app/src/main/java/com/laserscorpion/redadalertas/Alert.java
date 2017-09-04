@@ -6,14 +6,18 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 
 import com.laserscorpion.redadalertas.db.AlertsDatabaseContract;
+import com.laserscorpion.redadalertas.db.LocationPrefDatabaseHelper;
+import com.laserscorpion.redadalertas.db.StoredLocation;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
 public class Alert implements Serializable {
     public static final String ALERT_EXTRA_NAME = "com.laserscorpion.redadalertas.Alert";
+    public static final float ALERT_DISTANCE_METERS = 2000;
 
     public enum Agency {
         ICE, CBP, LOCAL_POLICE, LOCAL_SHERIFF
@@ -83,6 +87,12 @@ public class Alert implements Serializable {
     }
 
     public boolean isOfInterest(Context context) {
-        return true;
+        LocationPrefDatabaseHelper db = new LocationPrefDatabaseHelper(context);
+        ArrayList<StoredLocation> locations = db.getLocations();
+        for (StoredLocation loc : locations) {
+            if (location.distanceTo(loc.location) < ALERT_DISTANCE_METERS)
+                return true;
+        }
+        return false;
     }
 }
