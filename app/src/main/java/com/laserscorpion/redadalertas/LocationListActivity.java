@@ -44,8 +44,8 @@ public class LocationListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.location_toolbar);
-        setSupportActionBar(toolbar);
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.location_toolbar);
+        setSupportActionBar(toolbar);*/
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         db = new LocationPrefDatabaseHelper(this);

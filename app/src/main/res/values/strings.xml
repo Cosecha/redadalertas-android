@@ -17,6 +17,7 @@
     <string name="error_dialog_acknowledge_button">OK</string>
     <string name="alert_available_message">Warning! There is a new alert for your area of interest.</string>
     <string name="gms_not_available_message">Can\'t connect to Google, which is necessary for selecting a place to add on a map.</string>
+    <string name="alert_list_title">Nearby alerts</string>
 
     <string name="event_type_raid">Raid</string>
     <string name="event_type_checkpoint">Checkpoint</string>
@@ -40,5 +41,6 @@
     <string name="location_action_keep_location">Keep location</string>
 
     <string name="action_add_location">Add location</string>
+    <string name="action_open_settings">Settings</string>
     <!-- =========================================================================================== -->
 </resources>
