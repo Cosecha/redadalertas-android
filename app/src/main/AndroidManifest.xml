@@ -30,12 +30,12 @@
         </activity -->
 
         <activity
-            android:name=".AlertMapActivity"
+            android:name=".ui.AlertMapActivity"
             android:label="@string/title_activity_alert_map">
         </activity>
 
         <activity
-            android:name=".LocationListActivity"
+            android:name=".ui.LocationListActivity"
             android:label="@string/title_activity_location_list"
             android:parentActivityName=".AlertListActivity">
         </activity>

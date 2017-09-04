@@ -1,13 +1,9 @@
-package com.laserscorpion.redadalertas;
+package com.laserscorpion.redadalertas.ui;
 
-import android.app.ActionBar;
-import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +11,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.laserscorpion.redadalertas.Alert;
+import com.laserscorpion.redadalertas.AlertChecker;
+import com.laserscorpion.redadalertas.NotificationFactory;
+import com.laserscorpion.redadalertas.R;
 import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
 
 import java.util.ArrayList;
@@ -27,8 +27,6 @@ public class AlertListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.alert_toolbar);
-        setSupportActionBar(toolbar);*/
         getSupportActionBar().setTitle(getString(R.string.alert_list_title));
         setContentView(R.layout.activity_alert_list);
 
@@ -65,9 +63,6 @@ public class AlertListActivity extends AppCompatActivity {
         ListView alertList = (ListView)findViewById(R.id.alert_listview);
         alertList.setAdapter(adapter);
         alertList.setOnItemClickListener(clickListener);
-
-        //setListAdapter(adapter);
-        //getListView().setOnItemClickListener(clickListener);
     }
 
     @Override

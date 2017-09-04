@@ -1,13 +1,11 @@
-package com.laserscorpion.redadalertas;
+package com.laserscorpion.redadalertas.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -22,6 +20,7 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
+import com.laserscorpion.redadalertas.R;
 import com.laserscorpion.redadalertas.db.LocationPrefDatabaseHelper;
 import com.laserscorpion.redadalertas.db.StoredLocation;
 
@@ -44,8 +43,6 @@ public class LocationListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.location_toolbar);
-        setSupportActionBar(toolbar);*/
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         db = new LocationPrefDatabaseHelper(this);
@@ -54,10 +51,6 @@ public class LocationListActivity extends AppCompatActivity {
         ListView list = (ListView)findViewById(R.id.location_listview);
         list.setAdapter(adapter);
         registerForContextMenu(list);
-
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            list.setNestedScrollingEnabled(true);
-        }*/
     }
 
     @Override
@@ -87,9 +80,6 @@ public class LocationListActivity extends AppCompatActivity {
                 adapter.add(location);
         }
 
-        /*ArrayList<StoredLocation> newLocations = new ArrayList<>(currentLocations);
-        newLocations.removeAll(savedLocations);
-        adapter.addAll(newLocations);*/
         adapter.notifyDataSetChanged();
 
         savedLocations = currentLocations;

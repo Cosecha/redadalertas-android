@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas;
+package com.laserscorpion.redadalertas.ui;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
@@ -11,6 +11,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.laserscorpion.redadalertas.Alert;
+import com.laserscorpion.redadalertas.R;
 
 public class AlertMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
