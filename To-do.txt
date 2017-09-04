@@ -1,0 +1,7 @@
+-Translation
+-More sophisticated "isOfInterest()" handling
+-Use current location
+	-check for nearby events when moving
+-Listen for push notifications (keep a service running?)
+-More preferences (e.g. distance, how recent should nearby alerts be?)
+-Test more devices and network conditions
