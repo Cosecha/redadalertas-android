@@ -48,9 +48,10 @@ public class AlertListActivity extends AppCompatActivity {
         super.onResume();
         AlertsDatabaseHelper db = new AlertsDatabaseHelper(this);
         alertList = db.getAlertsSince(new Date(0L)); // pretty sure we're not going to deal with alerts before 1970...
-        /*for (Alert alert : alerts) {
-
-        }*/
+        for (Alert alert : alertList) {
+            if (!alert.isOfInterest(this))
+                alertList.remove(alert);
+        }
         AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 Alert alert = alertList.get(position);
