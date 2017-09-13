@@ -5,3 +5,4 @@
 -Listen for push notifications (keep a service running?)
 -More preferences (e.g. distance, how recent should nearby alerts be?)
 -Test more devices and network conditions
+-Check for nearby alerts when adding a new saved location
