@@ -1,9 +1,11 @@
 package com.redadalertas.client.ui;
 
 import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,14 +23,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-public class AlertListActivity extends Activity {
+public class AlertListActivity extends AppCompatActivity {
     Context context = this;
     ArrayList<Alert> alertList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().setTitle(getString(R.string.alert_list_title));
+        getSupportActionBar().setTitle(getString(R.string.alert_list_title));
         setContentView(R.layout.activity_alert_list);
 
         Intent creationIntent = getIntent();
