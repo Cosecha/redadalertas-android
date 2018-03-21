@@ -37,11 +37,11 @@
         <activity
             android:name=".ui.LocationListActivity"
             android:label="@string/title_activity_location_list"
-            android:parentActivityName=".AlertListActivity">
+            android:parentActivityName=".ui.AlertListActivity">
         </activity>
 
         <activity
-            android:name=".AlertListActivity"
+            android:name=".ui.AlertListActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

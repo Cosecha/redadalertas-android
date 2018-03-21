@@ -1,9 +1,9 @@
 package com.laserscorpion.redadalertas.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,15 +19,16 @@ import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
-public class AlertListActivity extends AppCompatActivity {
+public class AlertListActivity extends Activity {
     Context context = this;
     ArrayList<Alert> alertList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setTitle(getString(R.string.alert_list_title));
+        getActionBar().setTitle(getString(R.string.alert_list_title));
         setContentView(R.layout.activity_alert_list);
 
         Intent creationIntent = getIntent();
@@ -46,10 +47,16 @@ public class AlertListActivity extends AppCompatActivity {
         super.onResume();
         AlertsDatabaseHelper db = new AlertsDatabaseHelper(this);
         alertList = db.getAlertsSince(new Date(0L)); // pretty sure we're not going to deal with alerts before 1970...
-        for (Alert alert : alertList) {
+        Iterator<Alert> iterator = alertList.iterator();
+        while (iterator.hasNext()) {
+            Alert alert = iterator.next();
+            if (!alert.isOfInterest(this))
+                iterator.remove();
+        }
+        /*for (Alert alert : alertList) {
             if (!alert.isOfInterest(this))
                 alertList.remove(alert);
-        }
+        }*/
         AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 Alert alert = alertList.get(position);

@@ -5,6 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.laserscorpion.redadalertas.ui.AlertListActivity;
+import com.laserscorpion.redadalertas.ui.AlertMapActivity;
+
 import java.security.SecureRandom;
 
 /**
