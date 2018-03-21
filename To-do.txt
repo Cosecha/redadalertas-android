@@ -1,3 +1,4 @@
+-Update Thali to latest Orbot (important!)
 -Translation
 -More sophisticated "isOfInterest()" handling
 -Use current location
