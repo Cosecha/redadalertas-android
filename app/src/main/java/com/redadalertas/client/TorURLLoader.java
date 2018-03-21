@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -52,7 +53,7 @@ import javax.net.ssl.SSLSocketFactory;
  * don't, I want to visit it).
  */
 public class TorURLLoader extends Thread {
-    private static final String APP_NAME = "com.laserscorpion.redadalertas";
+    private static final String APP_NAME = "com.redadalertas.client";
     private static final String CRLF = "\r\n";
     private static final String CHARSET = "utf-8"; // the only one you may ever use for anything ever again, says me
     private String version = "*";
@@ -224,14 +225,15 @@ public class TorURLLoader extends Thread {
 
     private void sendRequest(SSLSocket socket, String request) {
         try {
+            Log.d(TAG, "Sending request: " + request);
             OutputStreamWriter writer;
             writer = new OutputStreamWriter(socket.getOutputStream(), CHARSET);
             writer.write(request);
             writer.flush();
-            Log.d(TAG, "Sent request: " + request);
         } catch (IOException e) {
             // todo why would this happen?
             // is there any scenario in which the socket would be closed
+            // yes, it turns out! when the URL can't be reached due to e.g. cert errors
             e.printStackTrace();
             return;
         }
@@ -277,9 +279,14 @@ public class TorURLLoader extends Thread {
 
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         try {
-            return (SSLSocket) factory.createSocket(socket, url.getHost(), 443, true);
-        } catch (IOException e) {
-            throw new ConnectException("can't convert socket to SSL");
+            SSLSocket sock = (SSLSocket)factory.createSocket(socket, url.getHost(), 443, true);
+            Method method = sock.getClass().getMethod("setHostname", String.class);
+            method.invoke(sock, url.getHost());
+            return  sock;
+        } catch (Exception e) {
+            ConnectException ce = new ConnectException("can't convert socket to SSL");
+            ce.setStackTrace(e.getStackTrace());
+            throw ce;
         }
     }
 
