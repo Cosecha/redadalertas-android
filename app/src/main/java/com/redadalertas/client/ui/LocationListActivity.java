@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.ui;
+package com.redadalertas.client.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -20,9 +20,9 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
-import com.laserscorpion.redadalertas.R;
-import com.laserscorpion.redadalertas.db.LocationPrefDatabaseHelper;
-import com.laserscorpion.redadalertas.db.StoredLocation;
+import com.redadalertas.client.R;
+import com.redadalertas.client.db.LocationPrefDatabaseHelper;
+import com.redadalertas.client.db.StoredLocation;
 
 import java.util.ArrayList;
 

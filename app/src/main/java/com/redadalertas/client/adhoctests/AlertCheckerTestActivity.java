@@ -1,10 +1,10 @@
-package com.laserscorpion.redadalertas.adhoctests;
+package com.redadalertas.client.adhoctests;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.laserscorpion.redadalertas.AlertChecker;
-import com.laserscorpion.redadalertas.R;
+import com.redadalertas.client.AlertChecker;
+import com.redadalertas.client.R;
 
 public class AlertCheckerTestActivity extends AppCompatActivity {
 

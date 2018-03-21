@@ -1,19 +1,15 @@
-package com.laserscorpion.redadalertas;
+package com.redadalertas.client;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.preference.PreferenceManager;
 
-import com.laserscorpion.redadalertas.db.AlertsDatabaseContract;
-import com.laserscorpion.redadalertas.db.LocationPrefDatabaseHelper;
-import com.laserscorpion.redadalertas.db.StoredLocation;
+import com.redadalertas.client.db.LocationPrefDatabaseHelper;
+import com.redadalertas.client.db.StoredLocation;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
 
 public class Alert implements Serializable {
     public static final String ALERT_EXTRA_NAME = "com.laserscorpion.redadalertas.Alert";

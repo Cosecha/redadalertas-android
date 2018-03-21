@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.db;
+package com.redadalertas.client.db;
 
 
 import android.provider.BaseColumns;

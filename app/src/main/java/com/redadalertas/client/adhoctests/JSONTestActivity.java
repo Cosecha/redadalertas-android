@@ -1,20 +1,15 @@
-package com.laserscorpion.redadalertas.adhoctests;
+package com.redadalertas.client.adhoctests;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.webkit.WebView;
 
-import com.laserscorpion.redadalertas.Alert;
-import com.laserscorpion.redadalertas.AlertJSONParser;
-import com.laserscorpion.redadalertas.R;
-import com.laserscorpion.redadalertas.TorURLLoader;
-import com.laserscorpion.redadalertas.URLDataReceiver;
-import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
+import com.redadalertas.client.Alert;
+import com.redadalertas.client.AlertJSONParser;
+import com.redadalertas.client.R;
+import com.redadalertas.client.TorURLLoader;
+import com.redadalertas.client.URLDataReceiver;
+import com.redadalertas.client.db.AlertsDatabaseHelper;
 
 import org.json.JSONException;
 

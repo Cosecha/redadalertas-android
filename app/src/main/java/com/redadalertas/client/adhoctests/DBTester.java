@@ -1,10 +1,10 @@
-package com.laserscorpion.redadalertas.adhoctests;
+package com.redadalertas.client.adhoctests;
 
 import android.content.Context;
 import android.location.Location;
 
-import com.laserscorpion.redadalertas.Alert;
-import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
+import com.redadalertas.client.Alert;
+import com.redadalertas.client.db.AlertsDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;

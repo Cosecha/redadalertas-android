@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.ui;
+package com.redadalertas.client.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,11 +11,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.laserscorpion.redadalertas.Alert;
-import com.laserscorpion.redadalertas.AlertChecker;
-import com.laserscorpion.redadalertas.NotificationFactory;
-import com.laserscorpion.redadalertas.R;
-import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
+import com.redadalertas.client.Alert;
+import com.redadalertas.client.AlertChecker;
+import com.redadalertas.client.NotificationFactory;
+import com.redadalertas.client.R;
+import com.redadalertas.client.db.AlertsDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -24,7 +24,7 @@
               android:layout_weight=".7"
               android:layout_centerHorizontal="true"
               android:paddingBottom="16dp"
-              tools:context="com.laserscorpion.redadalertas.ui.AlertMapActivity"
+              tools:context="com.redadalertas.client.ui.AlertMapActivity"
               />
     <TableLayout
         android:layout_width="match_parent"

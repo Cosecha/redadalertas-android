@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.ui;
+package com.redadalertas.client.ui;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import com.laserscorpion.redadalertas.R;
+import com.redadalertas.client.R;
 
 
 public class ErrorDialog extends DialogFragment {

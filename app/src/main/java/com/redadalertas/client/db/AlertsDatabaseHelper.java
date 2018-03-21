@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas.db;
+package com.redadalertas.client.db;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.os.AsyncTask;
 
-import com.laserscorpion.redadalertas.Alert;
+import com.redadalertas.client.Alert;
 
 import java.util.ArrayList;
 import java.util.Date;

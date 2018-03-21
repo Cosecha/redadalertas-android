@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.laserscorpion.redadalertas.adhoctests.TorCheckActivity">
+    tools:context="com.redadalertas.client.adhoctests.TorCheckActivity">
 
     <WebView
         android:id="@+id/tor_web_view"

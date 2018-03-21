@@ -1,16 +1,14 @@
-package com.laserscorpion.redadalertas.adhoctests;
+package com.redadalertas.client.adhoctests;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 
-import com.laserscorpion.redadalertas.R;
-import com.laserscorpion.redadalertas.TorURLLoader;
-import com.laserscorpion.redadalertas.URLDataReceiver;
+import com.redadalertas.client.R;
+import com.redadalertas.client.TorURLLoader;
+import com.redadalertas.client.URLDataReceiver;
 
 import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 
 /**

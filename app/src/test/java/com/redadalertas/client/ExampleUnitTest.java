@@ -1,4 +1,4 @@
-package com.laserscorpion.redadalertas;
+package com.redadalertas.client;
 
 import org.junit.Test;
 

@@ -1,12 +1,12 @@
-package com.laserscorpion.redadalertas;
+package com.redadalertas.client;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import com.laserscorpion.redadalertas.ui.AlertListActivity;
-import com.laserscorpion.redadalertas.ui.AlertMapActivity;
+import com.redadalertas.client.ui.AlertListActivity;
+import com.redadalertas.client.ui.AlertMapActivity;
 
 import java.security.SecureRandom;
 

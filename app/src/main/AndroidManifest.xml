@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.laserscorpion.redadalertas"
+<manifest package="com.redadalertas.client"
           xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
@@ -30,18 +30,18 @@
         </activity -->
 
         <activity
-            android:name=".ui.AlertMapActivity"
+            android:name="com.redadalertas.client.ui.AlertMapActivity"
             android:label="@string/title_activity_alert_map">
         </activity>
 
         <activity
-            android:name=".ui.LocationListActivity"
+            android:name="com.redadalertas.client.ui.LocationListActivity"
             android:label="@string/title_activity_location_list"
-            android:parentActivityName=".ui.AlertListActivity">
+            android:parentActivityName="com.redadalertas.client.ui.AlertListActivity">
         </activity>
 
         <activity
-            android:name=".ui.AlertListActivity"
+            android:name="com.redadalertas.client.ui.AlertListActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -49,7 +49,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".adhoctests.AlertCheckerTestActivity">
+        <activity android:name="com.redadalertas.client.adhoctests.AlertCheckerTestActivity">
         </activity>
 
         <!--

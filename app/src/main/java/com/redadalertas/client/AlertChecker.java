@@ -1,11 +1,11 @@
-package com.laserscorpion.redadalertas;
+package com.redadalertas.client;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.util.Log;
 
-import com.laserscorpion.redadalertas.db.AlertsDatabaseHelper;
+import com.redadalertas.client.db.AlertsDatabaseHelper;
 
 import org.json.JSONException;
 
